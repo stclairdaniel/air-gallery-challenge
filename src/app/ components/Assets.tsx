@@ -4,6 +4,7 @@ import Image from "next/image";
 
 export const Assets = () => {
   const [assets, setAssets] = useState<ClipsListResponse | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -13,33 +14,36 @@ export const Assets = () => {
     fetch();
   }, []);
 
-  console.log(assets);
+  const handleTitleClick = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   return (
     <>
-      Assets ({assets?.data?.total})
-      <div className="flex flex-wrap gap-4">
-        {assets?.data?.clips?.map((asset) => (
-          <div
-            key={asset.id}
-            className="text-12 font-bold uppercase text-grey-10 w-[200px] h-[200px] overflow-hidden"
-          >
-            {asset.assets.image && (
-              <Image
-                src={asset.assets.image}
-                alt={
-                  asset.description ||
-                  asset.title ||
-                  asset.displayName ||
-                  "assetImage"
-                }
-                width={400}
-                height={400}
-              />
-            )}
-          </div>
-        ))}
+      <div className="cursor-pointer" onClick={handleTitleClick}>
+        Assets ({assets?.data?.total})
       </div>
+      {!isCollapsed && (
+        <div className="flex flex-wrap gap-4">
+          {assets?.data?.clips?.map((asset) => (
+            <div key={asset.id} className="w-[200px] h-[200px] overflow-hidden">
+              {asset.assets.image && (
+                <Image
+                  src={asset.assets.image}
+                  alt={
+                    asset.description ||
+                    asset.title ||
+                    asset.displayName ||
+                    "assetImage"
+                  }
+                  width={400}
+                  height={400}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 };
