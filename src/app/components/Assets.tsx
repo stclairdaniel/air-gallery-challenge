@@ -25,6 +25,7 @@ export const Assets = () => {
   const { width } = useWindowDimensions();
   const scrollPosition = useScrollPosition();
 
+  // Handle initial data fetching
   useEffect(() => {
     const fetch = async () => {
       const assetsResponse = await fetchAssets({ cursor: null });
@@ -33,6 +34,7 @@ export const Assets = () => {
     fetch();
   }, []);
 
+  // Handle fetch more on scroll to bottom of page
   useEffect(() => {
     const fetch = async (cursor: string) => {
       const assetsResponse = await fetchAssets({ cursor });
@@ -59,22 +61,24 @@ export const Assets = () => {
     }
   }, [scrollPosition, assets]);
 
-  const handleTitleClick = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
   if (!assets) {
     return null;
   }
+
+  const handleTitleClick = () => {
+    setIsCollapsed(!isCollapsed);
+  };
 
   const numColumns = Math.floor(width / IMAGE_SIZE);
   const numRows = Math.ceil((assets?.data?.clips || []).length / numColumns);
   const NUM_VISIBLE_ROWS = 6; // TODO: Determine from initial container height
 
   // Struggling a bit here - for Grid this feels like it should take both row and column index?
+  /*
   const getDynamicColumnWidth = (index: Index) => {
     return assets?.data.clips?.[index.index]?.width || IMAGE_SIZE;
   };
+  */
 
   const gridCellRenderer: GridCellRenderer = ({
     columnIndex,
