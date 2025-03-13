@@ -34,7 +34,7 @@ export const Boards = () => {
                   priority
                   width={400} // My first time working with next.js images, not sure how to handle this error when width isn't provided
                   height={400}
-                  className="grayscale"
+                  className="grayscale" // TODO: debug why grayscale-x is not working
                 />
               )}
             </div>
