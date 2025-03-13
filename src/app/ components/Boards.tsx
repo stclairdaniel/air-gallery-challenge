@@ -25,9 +25,9 @@ export const Boards = () => {
             {board.thumbnails?.[0] && (
               <Image
                 src={board.thumbnails?.[0]}
-                alt={board.description || board.description || "boardImage"}
+                alt={board.description || board.title || "boardImage"}
                 priority
-                width={400}
+                width={400} // My first time working with next.js images, not sure how to handle this error when width isn't provided
                 height={400}
                 className="grayscale"
               />

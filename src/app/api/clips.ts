@@ -58,6 +58,7 @@ export interface Clip {
   resolution?: number;
   boardCount?: number;
   tagCount?: number;
+  displayName?: string;
 }
 
 export interface ClipsListResponse {
