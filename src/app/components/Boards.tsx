@@ -39,6 +39,8 @@ export const Boards = () => {
                   priority
                   fill
                   className="object-cover rounded-lg"
+                  sizes="300px"
+                  quality={75}
                 />
               )}
               <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-black/40 rounded-lg" />

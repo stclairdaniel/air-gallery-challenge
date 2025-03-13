@@ -1,10 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { ClipsListResponse, fetchAssets } from "../api/clips";
 import Image from "next/image";
-import { Grid, GridCellRenderer } from "react-virtualized";
+import {
+  CellMeasurer,
+  CellMeasurerCache,
+  Grid,
+  GridCellRenderer,
+  Index,
+} from "react-virtualized";
 import { useScrollPosition, useWindowDimensions } from "./Assets.utils";
 import { IMAGE_SIZE, LOAD_MORE_SCROLL_THRESHOLD } from "./constants";
 import { HoverCarat, SectionTitle } from "./shared";
+
+const cache = new CellMeasurerCache({
+  fixedWidth: false,
+  defaultHeight: IMAGE_SIZE,
+});
 
 export const Assets = () => {
   const [assets, setAssets] = useState<ClipsListResponse | null>(null);
@@ -58,11 +69,18 @@ export const Assets = () => {
   const numRows = Math.ceil((assets?.data?.clips || []).length / numColumns);
   const NUM_VISIBLE_ROWS = 6; // TODO: Determine from container height
 
+  // Struggling a bit here - for Grid this feels like it should take both row and column index?
+  // Going to skip this for now and come back to it if time permits
+  const getDynamicColumnWidth = (index: Index) => {
+    return assets?.data.clips?.[index.index]?.width || IMAGE_SIZE;
+  };
+
   const gridCellRenderer: GridCellRenderer = ({
     columnIndex,
     key,
     rowIndex,
     style,
+    parent,
   }) => {
     const assetIndex = rowIndex * numColumns + columnIndex;
     const asset = assets?.data.clips?.[assetIndex];
@@ -71,25 +89,39 @@ export const Assets = () => {
       return null;
     }
 
+    const scale = asset.width / asset.height;
+    const scaledWidth = IMAGE_SIZE * scale;
+
     return (
-      <div
+      <CellMeasurer
         key={key}
-        style={style}
-        className={`relative w-[${IMAGE_SIZE}px] h-[${IMAGE_SIZE}px] overflow-hidden`}
+        cache={cache}
+        columnIndex={columnIndex}
+        rowIndex={rowIndex}
+        parent={parent}
       >
-        {asset.assets.image && (
-          <Image
-            src={asset.assets.image}
-            alt={
-              asset.description ||
-              asset.title ||
-              asset.displayName ||
-              "assetImage"
-            }
-            fill
-          />
-        )}
-      </div>
+        <div
+          key={key}
+          style={style}
+          className="flex overflow-hidden justify-center items-center content-center margin-4"
+        >
+          {asset.assets.image && (
+            <Image
+              src={asset.assets.image}
+              alt={
+                asset.description ||
+                asset.title ||
+                asset.displayName ||
+                "assetImage"
+              }
+              height={IMAGE_SIZE}
+              width={scaledWidth}
+              quality={75}
+              sizes="300px"
+            />
+          )}
+        </div>
+      </CellMeasurer>
     );
   };
 
@@ -107,6 +139,7 @@ export const Assets = () => {
           rowCount={numRows}
           rowHeight={IMAGE_SIZE}
           width={width}
+          deferredMeasurementCache={cache}
         />
       )}
     </>
