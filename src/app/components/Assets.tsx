@@ -2,14 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { ClipsListResponse, fetchAssets } from "../api/clips";
 import Image from "next/image";
 import { Grid, GridCellRenderer } from "react-virtualized";
-import { useWindowDimensions } from "./Assets.utils";
+import { useScrollPosition, useWindowDimensions } from "./Assets.utils";
 
 const IMAGE_SIZE = 200; // Naive approch to get virtualization working
 
 export const Assets = () => {
   const [assets, setAssets] = useState<ClipsListResponse | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
+  const scrollPosition = useScrollPosition();
 
   useEffect(() => {
     const fetch = async () => {
@@ -18,6 +19,32 @@ export const Assets = () => {
     };
     fetch();
   }, []);
+
+  useEffect(() => {
+    const fetch = async (cursor: string) => {
+      const assetsResponse = await fetchAssets({ cursor });
+      const updatedAssets = {
+        ...assets,
+        data: {
+          total: assetsResponse.data.total,
+          clips: [
+            ...(assets?.data.clips || []),
+            ...(assetsResponse.data.clips || []),
+          ],
+        },
+        pagination: assetsResponse.pagination,
+      };
+      setAssets(updatedAssets);
+    };
+
+    if (
+      scrollPosition > 75 &&
+      assets?.pagination.hasMore &&
+      assets?.pagination.cursor
+    ) {
+      fetch(assets?.pagination.cursor);
+    }
+  }, [scrollPosition, assets]);
 
   const handleTitleClick = () => {
     setIsCollapsed(!isCollapsed);
@@ -29,6 +56,7 @@ export const Assets = () => {
 
   const numColumns = Math.floor(width / IMAGE_SIZE);
   const numRows = Math.ceil((assets?.data?.clips || []).length / numColumns);
+  const NUM_VISIBLE_ROWS = 6; // TODO: Determine from container height
 
   const gridCellRenderer: GridCellRenderer = ({
     columnIndex,
@@ -76,7 +104,7 @@ export const Assets = () => {
           cellRenderer={gridCellRenderer}
           columnCount={numColumns}
           columnWidth={IMAGE_SIZE}
-          height={numRows * IMAGE_SIZE}
+          height={NUM_VISIBLE_ROWS * IMAGE_SIZE}
           rowCount={numRows}
           rowHeight={IMAGE_SIZE}
           width={width}
