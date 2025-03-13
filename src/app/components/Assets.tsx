@@ -17,6 +17,8 @@ const cache = new CellMeasurerCache({
   defaultHeight: IMAGE_SIZE,
 });
 
+const GRID_SPACING_PX = 10;
+
 export const Assets = () => {
   const [assets, setAssets] = useState<ClipsListResponse | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -67,10 +69,9 @@ export const Assets = () => {
 
   const numColumns = Math.floor(width / IMAGE_SIZE);
   const numRows = Math.ceil((assets?.data?.clips || []).length / numColumns);
-  const NUM_VISIBLE_ROWS = 6; // TODO: Determine from container height
+  const NUM_VISIBLE_ROWS = 6; // TODO: Determine from initial container height
 
   // Struggling a bit here - for Grid this feels like it should take both row and column index?
-  // Going to skip this for now and come back to it if time permits
   const getDynamicColumnWidth = (index: Index) => {
     return assets?.data.clips?.[index.index]?.width || IMAGE_SIZE;
   };
@@ -102,8 +103,12 @@ export const Assets = () => {
       >
         <div
           key={key}
-          style={style}
-          className="flex overflow-hidden justify-center items-center content-center margin-4"
+          style={{
+            ...style,
+            height: IMAGE_SIZE - GRID_SPACING_PX,
+            width: IMAGE_SIZE - GRID_SPACING_PX,
+          }}
+          className="flex overflow-hidden justify-center items-center content-center box-border margin-4"
         >
           {asset.assets.image && (
             <Image
