@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { BoardsListResponse, fetchBoards } from "../api/boards";
 import Image from "next/image";
+import { IMAGE_SIZE } from "./constants";
+import { HoverCarat, SectionTitle } from "./shared";
 
 export const Boards = () => {
   const [boards, setBoards] = useState<BoardsListResponse | null>(null);
@@ -20,23 +22,29 @@ export const Boards = () => {
 
   return (
     <>
-      <div className="cursor-pointer" onClick={handleTitleClick}>
-        Boards ({boards?.data?.length})
-      </div>
+      <SectionTitle onClick={handleTitleClick}>
+        BOARDS ({boards?.data?.length}) <HoverCarat isCollapsed={isCollapsed} />
+      </SectionTitle>
       {!isCollapsed && (
         <div className="flex flex-wrap gap-4">
           {boards?.data?.map((board) => (
-            <div key={board.id} className="w-[200px] h-[200px] overflow-hidden">
+            <div
+              key={board.id}
+              className={`relative w-[${IMAGE_SIZE}px] h-[${IMAGE_SIZE}px] overflow-hidden`}
+            >
               {board.thumbnails?.[0] && (
                 <Image
                   src={board.thumbnails?.[0]}
                   alt={board.description || board.title || "boardImage"}
                   priority
-                  width={400} // My first time working with next.js images, not sure how to handle this error when width isn't provided
-                  height={400}
-                  className="grayscale" // TODO: debug why grayscale-x is not working
+                  fill
+                  className="object-cover rounded-lg"
                 />
               )}
+              <div className="absolute inset-0 bg-gradient-to-b from-white/40 to-black/40 rounded-lg" />
+              <div className="absolute bottom-4 left-2 text-white cursor-pointer">
+                {board.title}
+              </div>
             </div>
           ))}
         </div>

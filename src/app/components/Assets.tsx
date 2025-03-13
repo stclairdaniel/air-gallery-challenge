@@ -3,8 +3,8 @@ import { ClipsListResponse, fetchAssets } from "../api/clips";
 import Image from "next/image";
 import { Grid, GridCellRenderer } from "react-virtualized";
 import { useScrollPosition, useWindowDimensions } from "./Assets.utils";
-
-const IMAGE_SIZE = 200; // Naive approch to get virtualization working
+import { IMAGE_SIZE, LOAD_MORE_SCROLL_THRESHOLD } from "./constants";
+import { HoverCarat, SectionTitle } from "./shared";
 
 export const Assets = () => {
   const [assets, setAssets] = useState<ClipsListResponse | null>(null);
@@ -38,7 +38,7 @@ export const Assets = () => {
     };
 
     if (
-      scrollPosition > 75 &&
+      scrollPosition > LOAD_MORE_SCROLL_THRESHOLD &&
       assets?.pagination.hasMore &&
       assets?.pagination.cursor
     ) {
@@ -75,7 +75,7 @@ export const Assets = () => {
       <div
         key={key}
         style={style}
-        className={`w-[${IMAGE_SIZE}px] h-[${IMAGE_SIZE}px] overflow-hidden`}
+        className={`relative w-[${IMAGE_SIZE}px] h-[${IMAGE_SIZE}px] overflow-hidden`}
       >
         {asset.assets.image && (
           <Image
@@ -86,8 +86,7 @@ export const Assets = () => {
               asset.displayName ||
               "assetImage"
             }
-            width={IMAGE_SIZE}
-            height={IMAGE_SIZE}
+            fill
           />
         )}
       </div>
@@ -96,9 +95,9 @@ export const Assets = () => {
 
   return (
     <>
-      <div className="cursor-pointer" onClick={handleTitleClick}>
-        Assets ({assets?.data?.total})
-      </div>
+      <SectionTitle onClick={handleTitleClick}>
+        ASSETS ({assets?.data?.total}) <HoverCarat isCollapsed={isCollapsed} />
+      </SectionTitle>
       {!isCollapsed && (
         <Grid
           cellRenderer={gridCellRenderer}
